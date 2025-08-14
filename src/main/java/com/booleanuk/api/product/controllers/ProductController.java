@@ -72,4 +72,14 @@ public class ProductController {
         }
     }
 
+    @GetMapping({"categories/{category}"})
+    public List<Product> getAllByCategory(@PathVariable String category){
+        List<Product> prods = this.productRepository.getAllByCategory(category);
+
+        if(prods.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return prods;
+    }
+
 }

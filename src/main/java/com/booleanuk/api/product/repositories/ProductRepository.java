@@ -2,6 +2,7 @@ package com.booleanuk.api.product.repositories;
 
 import com.booleanuk.api.product.models.Product;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductRepository {
@@ -42,5 +43,16 @@ public class ProductRepository {
         Product removeProd = this.getById(id);
         this.products.remove(removeProd);
         return removeProd; //Return null if not found
+    }
+
+    public List<Product> getAllByCategory(String cat){
+        List<Product> found = new ArrayList<>();
+        for(Product curr : this.products){
+            if(cat.equals(curr.getCategory())){
+                found.add(curr);
+            }
+        }
+        return found;
+
     }
 }
