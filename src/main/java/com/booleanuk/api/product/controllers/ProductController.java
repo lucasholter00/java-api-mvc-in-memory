@@ -19,7 +19,15 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAll(){
+    public List<Product> getAll(@RequestParam(defaultValue="") String category){
+        if(!category.isEmpty()){
+            List<Product> filteredProd = this.productRepository.getAllByCategory(category);
+            if(filteredProd.isEmpty()){
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No products with that category found");
+            }
+            return filteredProd;
+        }
+
         List<Product> allProds = this.productRepository.getAll();
         if(allProds.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No products found");
@@ -70,16 +78,6 @@ public class ProductController {
         if(product == null){
             throw new ResponseStatusException(status, message);
         }
-    }
-
-    @GetMapping({"categories/{category}"})
-    public List<Product> getAllByCategory(@PathVariable String category){
-        List<Product> prods = this.productRepository.getAllByCategory(category);
-
-        if(prods.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        return prods;
     }
 
 }
