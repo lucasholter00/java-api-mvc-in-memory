@@ -15,8 +15,18 @@ public class ProductRepository {
         return this.products;
     }
 
-    public void add(Product product){ //Void for now, would return db return if connected to db
+    public boolean checkNameConflict(Product product){
+        for(Product curr : this.products){
+            if(curr.getName().equals(product.getName())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Product add(Product product){ //Void for now, would return db return if connected to db
         this.products.add(product);
+        return product;
     }
 
     public Product getById(int id){

@@ -3,7 +3,6 @@ package com.booleanuk.api.product.controllers;
 import com.booleanuk.api.product.models.Product;
 import com.booleanuk.api.product.repositories.ProductRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,27 +20,38 @@ public class ProductController {
 
     @GetMapping
     public List<Product> getAll(){
-        return this.productRepository.getAll();
+        List<Product> allProds = this.productRepository.getAll();
+        if(allProds.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No products found");
+        }
+        return allProds;
     }
 
     @GetMapping("{id}")
     public Product getById(@PathVariable int id){
         Product prod = this.productRepository.getById(id);
-        nullCheckForSearch(prod);
+        nullCheck(prod, HttpStatus.NOT_FOUND, "Product not found.");
         return prod;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Product addProduct(@RequestBody Product product){
-        this.productRepository.add(product);
-        return product;
+        if(productRepository.checkNameConflict(product)){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Product with provided name already exists");
+        }
+        return this.productRepository.add(product);
     }
 
     @PutMapping("{id}")
     public Product putProduct(@RequestBody Product product, @PathVariable int id){
+
+        if(productRepository.checkNameConflict(product)){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Product with provided name already exists");
+        }
+
         Product foundProd = this.productRepository.getById(id);
-        nullCheckForSearch(foundProd);
+        nullCheck(foundProd, HttpStatus.NOT_FOUND, "Product not found.");
         foundProd.setName(product.getName());
         foundProd.setCategory(product.getCategory());
         foundProd.setPrice(product.getPrice());
@@ -52,13 +62,13 @@ public class ProductController {
     @DeleteMapping("{id}")
     public Product deleteProduct(@PathVariable int id){
         Product removed = this.productRepository.removeProduct(id);
-        nullCheckForSearch(removed);
+        nullCheck(removed, HttpStatus.NOT_FOUND, "Product not found.");
         return removed;
     }
 
-    private void nullCheckForSearch(Product product){
+    private void nullCheck(Product product, HttpStatus status, String message){
         if(product == null){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found.");
+            throw new ResponseStatusException(status, message);
         }
     }
 
